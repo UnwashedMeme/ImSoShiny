@@ -4,37 +4,47 @@ open Splendor.Events
 
 type ServerState = 
     | SettingUpGame
-    | WaitingForPlayerAction
+    | WaitingForMainAction
     | WaitingForCoinDiscard
     | WaitingForNobleBuy
     | FinishingTurn
     | EndGame
 
-
-let validateCorrectPlayer (gameState:GameState) (playerAction:PlayerAction) =
-    let playerUp = List.head gameState.players
-    let (fromPlayer, action) = playerAction
+let validateCorrectPlayer (gamestate:GameState) fromPlayer (action:Action) =
+    let playerUp = List.head gamestate.players
     if playerUp <> fromPlayer then
         Some (ServerEvent.InvalidAction(fromPlayer, action, "Not your turn"))
     else
         None
 
-let validateDraw2OfSame (gameState:GameState) (playerAction:PlayerAction) : ServerEvent option = 
-    None
+let validatePhase gamestate player action : ServerEvent option = 
+    Some (ServerEvent.InvalidAction (player, action, "Wrong phase"))
 
-let validateDraw3Different (gameState:GameState) (playerAction:PlayerAction) : ServerEvent option = 
-    None
 
-let validateBuyCard (gameState:GameState) (playerAction:PlayerAction) : ServerEvent option = 
-    None
-    
-let validateReserveCard (gameState:GameState) (playerAction:PlayerAction) : ServerEvent option = 
-    None
+let draw2OfSame (gamestate:GameState) (player:Player) (coin:Coin) =
+    ServerEvent.GameStateUpdate gamestate
 
-let validateBuyNoble (gameState:GameState) (playerAction:PlayerAction) : ServerEvent option = 
-    None
+let draw3Different (gamestate:GameState) player (coin1,coin2,coin3) = 
+    ServerEvent.GameStateUpdate gamestate
 
-let updateGameState (gameState:GameState) (playerAction:PlayerAction) =
-        ServerEvent.GameStateUpdate gameState
-        
-       
+let buyCard gamestate player card = 
+    ServerEvent.GameStateUpdate gamestate
+let reserveCard gamestate player card = 
+    ServerEvent.GameStateUpdate gamestate
+
+let mainAction gamestate player mainaction : ServerEvent = 
+    match mainaction with
+        | MainAction.Draw2OfSame coin -> draw2OfSame gamestate player coin
+        | MainAction.Draw3Different (coin1,coin2,coin3) -> draw3Different gamestate player (coin1,coin2,coin3)
+        | MainAction.BuyCard card -> buyCard gamestate player card
+        | MainAction.ReserveCard card -> reserveCard gamestate player card
+
+
+let receiveCommand (gamestate:GameState) player (action:Action): ServerEvent =
+    match (validateCorrectPlayer gamestate player action) with 
+        | Some se -> se
+        | None -> (match action with
+                    | Action.MainAction mainaction 
+                        -> validatePhase gamestate player action
+                           mainAction gamestate player mainaction 
+                )

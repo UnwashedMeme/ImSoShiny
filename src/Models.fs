@@ -38,7 +38,6 @@ type Player = {
     nobles: Noble list;
 } with
     member this.VictoryPoints :int = 
-        let getVP m :int = m.victoryPoints
         Seq.sum (Seq.concat [
                     (this.cards |> Seq.map (fun m -> m.victoryPoints));
                     (this.nobles|> Seq.map (fun b -> b.victoryPoints)); 
@@ -54,13 +53,20 @@ type GameState = {
 }
 
 //TODO: Split into separate Action Types per server state
-type Action =     
+type MainAction =     
     | Draw2OfSame of Coin
     | Draw3Different of Coin * Coin * Coin
     | BuyCard of Card
     | ReserveCard of Card
-    | BuyNoble of Noble
+
+type DiscardCoinsAction = 
     | DiscardCoins of Coin list
     | NOP
+type BuyNobleAction =
+    | BuyNoble of Noble
+    | NOP
 
-type PlayerAction = Player * Action
+type Action =
+  | MainAction of MainAction
+  | DiscardCoinsAction of DiscardCoinsAction
+  | BuyNobleAction of BuyNobleAction
