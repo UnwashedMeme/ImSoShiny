@@ -7,3 +7,5 @@ nuget Fable.Core
 nuget Fable.Import.Browser
 nuget Expecto
 nuget Expecto.VisualStudio.TestAdapter version_in_path: true
+nuget Expecto.FsCheck
+nuget FSharp.NET.Sdk
