@@ -13,7 +13,7 @@ type Coin = | Gem of Gem
 type Card = {
     image: Url;
     cost: Gem list;
-    provides: Gem; 
+    provides: Gem;
     victoryPoints: int;
 }
 
@@ -37,13 +37,13 @@ type Player = {
     cards: Card list;
     nobles: Noble list;
 } with
-    member this.VictoryPoints :int = 
-        Seq.sum (Seq.concat [
-                    (this.cards |> Seq.map (fun m -> m.victoryPoints));
-                    (this.nobles|> Seq.map (fun b -> b.victoryPoints)); 
-        ])
-          
-        
+    member this.VictoryPoints :int =
+        [
+            (this.cards |> Seq.sumBy (fun x -> x.victoryPoints));
+            (this.nobles |> Seq.sumBy (fun x -> x.victoryPoints));
+        ] |> Seq.sum
+
+
 type GameState = {
     players: Player list;
     bank: Bank;
@@ -53,13 +53,13 @@ type GameState = {
 }
 
 //TODO: Split into separate Action Types per server state
-type MainAction =     
+type MainAction =
     | Draw2OfSame of Coin
     | Draw3Different of Coin * Coin * Coin
     | BuyCard of Card
     | ReserveCard of Card
 
-type DiscardCoinsAction = 
+type DiscardCoinsAction =
     | DiscardCoins of Coin list
     | NOP
 type BuyNobleAction =
