@@ -10,18 +10,29 @@ type Qty = int
 type Gem = Red | Green | Brown | White | Blue | Gold
 type Coin = | Gem of Gem
 
-type Card = {
-    image: Url;
-    cost: Gem list;
-    provides: Gem; 
-    victoryPoints: int;
-}
+/// count upward to victory
+type IHasPoints =
+    abstract VictoryPoints: int
 
-type Noble = {
-    image: Url;
-    cost: Gem list;
-    victoryPoints: int;
-}
+type Card =
+    {
+        image: Url;
+        cost: Gem list;
+        provides: Gem;
+        victoryPoints: int;
+    }
+    interface IHasPoints with
+        member this.VictoryPoints = this.victoryPoints
+
+
+type Noble =
+    {
+        image: Url;
+        cost: Gem list;
+        victoryPoints: int;
+    }
+    interface IHasPoints with
+        member this.VictoryPoints = this.victoryPoints
 
 type Deck = {
     cards: Card list
@@ -32,18 +43,23 @@ type Bank = {
 }
 
 
-type Player = {
-    coins: Coin list;
-    cards: Card list;
-    nobles: Noble list;
-} with
-    member this.VictoryPoints :int = 
-        Seq.sum (Seq.concat [
-                    (this.cards |> Seq.map (fun m -> m.victoryPoints));
-                    (this.nobles|> Seq.map (fun b -> b.victoryPoints)); 
-        ])
-          
-        
+type Player =
+    {
+        coins: Coin list;
+        cards: Card list;
+        nobles: Noble list;
+    }
+    interface IHasPoints with
+        member this.VictoryPoints =
+            let getVp (x:IHasPoints) = x.VictoryPoints
+            [
+                (this.cards |> Seq.map getVp);
+                (this.nobles|> Seq.map getVp);
+            ]
+            |> Seq.concat
+            |> Seq.sum
+
+
 type GameState = {
     players: Player list;
     bank: Bank;
@@ -53,13 +69,13 @@ type GameState = {
 }
 
 //TODO: Split into separate Action Types per server state
-type MainAction =     
+type MainAction =
     | Draw2OfSame of Coin
     | Draw3Different of Coin * Coin * Coin
     | BuyCard of Card
     | ReserveCard of Card
 
-type DiscardCoinsAction = 
+type DiscardCoinsAction =
     | DiscardCoins of Coin list
     | NOP
 type BuyNobleAction =
