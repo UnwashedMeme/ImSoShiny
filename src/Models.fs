@@ -38,12 +38,11 @@ type Player = {
     nobles: Noble list;
 } with
     member this.VictoryPoints :int = 
-        Seq.sum (Seq.concat [
-                    (this.cards |> Seq.map (fun m -> m.victoryPoints));
-                    (this.nobles|> Seq.map (fun b -> b.victoryPoints)); 
-        ])
-          
-        
+        [
+            (this.cards  |> Seq.map (fun m -> m.victoryPoints)); 
+            (this.nobles |> Seq.map (fun b -> b.victoryPoints)); 
+        ] |> Seq.concat |> Seq.sum
+
 type GameState = {
     players: Player list;
     bank: Bank;
