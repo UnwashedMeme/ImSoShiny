@@ -32,9 +32,12 @@ let noble1 = {
 [<Tests>]
 let playerTests =
      testList "Player behavior" [
-        testProperty "Victory Points-0" {
+        test "Victory Points-0" {
             Expect.equal emptyPlayer.VictoryPoints 0 "An empty player has no victory Points";
         };
+        testProperty "Has Victory Points" <| fun (player:Player) ->
+           player.VictoryPoints >= 0
+           
         test "Victory Points >0" {
             let player = {
                 coins = []; nobles = [];

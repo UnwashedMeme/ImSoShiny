@@ -1,11 +1,8 @@
 source https://nuget.org/api/v2
 
 clitool dotnet-fable
-
-nuget FSharp.Core
-nuget Fable.Core
-nuget Fable.Import.Browser
 nuget Expecto
+nuget Fable.Import.Browser
 nuget Expecto.VisualStudio.TestAdapter version_in_path: true
-nuget Expecto.FsCheck
+nuget FsCheck
 nuget FSharp.NET.Sdk

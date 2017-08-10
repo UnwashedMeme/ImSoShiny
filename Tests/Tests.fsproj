@@ -1,21 +1,22 @@
-﻿<Project Sdk="FSharp.NET.Sdk;Microsoft.NET.Sdk">
-
+<Project Sdk="FSharp.NET.Sdk;Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp1.1</TargetFramework>
   </PropertyGroup>
-
   <ItemGroup>
+    <Compile Include="ExpectoFsCheck.fs" />
     <Compile Include="Tests.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
-
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.DotNet.Watcher.Tools" Version="1.0.0" />
   </ItemGroup>
-
+  <ItemGroup>
+    <PackageReference Include="FSharp.NET.Sdk" Version="1.0.*" PrivateAssets="All" />
+    <PackageReference Include="Paket" Version="5.84.0" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\src\Splendor.fsproj" />
-  </ItemGroup> 
+  </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>
