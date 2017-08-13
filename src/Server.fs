@@ -2,62 +2,96 @@ module Splendor.Server
 open Splendor.Models
 open Splendor.Events
 
-type ServerState = 
-    | SettingUpGame
-    | WaitingForMainAction
-    | WaitingForCoinDiscard
-    | WaitingForNobleBuy
-    | FinishingTurn
-    | EndGame
-
-let validateCorrectPlayer (gamestate:GameState) fromPlayer (action:Action) : string option  =
-    let playerUp = List.head gamestate.players
+let validateCorrectPlayer fromPlayer gamestate =
+    let playerUp = gamestate.currentPlayer
     if playerUp <> fromPlayer then
-        Some "Not your turn"
+        Error "Not your turn"
     else
-        None
+        Ok gamestate
 
-let validatePhase gamestate player action  = 
-    Some "Wrong phase"
+let validatePhase action gamestate = 
+    Error "Wrong phase"
 
-let bindValidator validator gamestate player action =
-    function 
-        | Some err ->  Some err
-        | None -> validator gamestate player action
-    
-let draw2OfSame (gamestate:GameState) (player:Player) (coin:Coin) =
-    ServerEvent.GameStateUpdate gamestate
+let draw2OfSame (gamestate:TurnData) (player:Player) (coin:Coin) =
+    let withdrawer b = Withdraw b coin
+    gamestate.bank 
+        |> withdrawer 
+        |> (Result.bind withdrawer)
+        |> (Result.bind (fun b -> Ok { gamestate with bank = b }))
 
-let draw3Different (gamestate:GameState) player (coin1,coin2,coin3) = 
-    ServerEvent.GameStateUpdate gamestate
+let draw3Different (gamestate:TurnData) player (coin1,coin2,coin3) = 
+    Error "Not different"
 
 let buyCard gamestate player card = 
-    ServerEvent.GameStateUpdate gamestate
+    Error "Can't afford it"
+
 let reserveCard gamestate player card = 
-    ServerEvent.GameStateUpdate gamestate
+    Error "Already reserved one"
 
 let discardCoins gamestate player discardCoinsAction = 
-    ServerEvent.GameStateUpdate gamestate
+    Error "You don't have those coins."
 
 let buyNoble gamestate player buyNobleAction =
-    ServerEvent.GameStateUpdate gamestate
+    Error "You don't have the cards."
     
 
-let mainAction gamestate player mainaction : ServerEvent = 
-    match mainaction with
-        | MainAction.Draw2OfSame coin -> draw2OfSame gamestate player coin
-        | MainAction.Draw3Different (coin1,coin2,coin3) -> draw3Different gamestate player (coin1,coin2,coin3)
-        | MainAction.BuyCard card -> buyCard gamestate player card
-        | MainAction.ReserveCard card -> reserveCard gamestate player card
+let mainAction gamestate player = function
+    | MainAction.Draw2OfSame coin -> draw2OfSame gamestate player coin
+    | MainAction.Draw3Different (coin1,coin2,coin3) -> draw3Different gamestate player (coin1,coin2,coin3)
+    | MainAction.BuyCard card -> buyCard gamestate player card
+    | MainAction.ReserveCard card -> reserveCard gamestate player card
 
+
+let nextPhase = function
+    | Main -> DiscardCoins
+    | DiscardCoins -> BuyNoble
+    | BuyNoble -> Finish
+    | Finish -> Main
+
+let doAction gamestate player = function 
+    | Action.MainAction ma -> mainAction gamestate player ma 
+    | Action.DiscardCoinsAction dca-> discardCoins gamestate player dca
+    | Action.BuyNobleAction bna -> buyNoble gamestate player bna
+
+let anyPlayerOverTargetVP td = false
+let lastPlayerOfRound td = false
+
+let nextPlayer td = 
+    Turn td 
+
+let endGame (td:TurnData) = 
+    GameState.EndOfGame {
+        players = td.players;
+        targetVictoryPoints = td.targetVictoryPoints;
+    }
+
+let finishTurn (td:TurnData) = 
+    // does (any player have > targetVictoryPoints
+     //      and last player) -> end of game
+     // next player
+    if (anyPlayerOverTargetVP td && lastPlayerOfRound td) then
+        endGame td
+    else
+        nextPlayer td
+
+let finishPhase turndata =
+    Ok (match turndata.phase with
+        | Finish -> finishTurn turndata
+        | phase -> (Turn {turndata with phase = (nextPhase phase)}))
+    
+    
+
+let (>>=) m f = Result.bind f m
 
 let receiveCommand (gamestate:GameState) player (action:Action): ServerEvent =
-    let validators = [validateCorrectPlayer; validatePhase]
-    
-    match validators |> Seq.tryPick (fun v-> v gamestate player action) with 
-        | Some reason -> ServerEvent.InvalidAction (player,action,reason)
-        | None -> match action with
-                    | Action.MainAction ma -> mainAction gamestate player ma 
-                    | Action.DiscardCoinsAction dca-> discardCoins gamestate player dca
-                    | Action.BuyNobleAction bna -> buyNoble gamestate player bna
-                
+    gamestate
+    |> function  
+        | Turn x -> Ok x
+        | _ -> Error "Wrong stage of game"
+    >>= validatePhase action 
+    >>= validateCorrectPlayer player 
+    >>= fun turndata -> doAction turndata player action
+    >>= finishPhase 
+    |> function 
+        | Ok gamestate -> ServerEvent.GameStateUpdate gamestate
+        | Error err ->  ServerEvent.InvalidAction (player, action, err)

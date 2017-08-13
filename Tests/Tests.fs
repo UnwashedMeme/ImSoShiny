@@ -3,13 +3,17 @@ open Expecto
 open Splendor.Models
 open Splendor.Events
 open Splendor.Server
+open FsCheck
+
+
 
 
 let emptyPlayer = { 
-            coins = [];
-            cards = [];
-            nobles = [];
-        }
+    coins = [];
+    cards = [];
+    nobles = [];
+    reservedCards = [];
+}
 
 let card1 = {
     image = "foo";
@@ -26,7 +30,7 @@ let card2 = {
 }
 let noble1 = {
     image = "noble";
-    cost = [Green; Blue; White; White;];
+    cost = [Mine Green; Mine Blue; Mine White; Mine White;];
     victoryPoints = 3
 }
 [<Tests>]
@@ -63,7 +67,7 @@ let updateGameStateTests =
         cards = [card1; card2]
     }
     let player2 =  {
-        coins = [Coin.Gem Green]; 
+        coins = [Coin.Coin Green]; 
         nobles = [noble1];
         cards = [card1; card2]
     }
@@ -74,7 +78,7 @@ let updateGameStateTests =
         tiershow = [];
         nobles = [];
     }
-    let action = MainAction (Draw2OfSame (Coin.Gem Green))
+    let action = MainAction (Draw2OfSame (Coin.Coin Green))
     testList "PlayerAction Validators" [
         testList "validateCorrectPlayer" [
             test "Right player" {
