@@ -15,7 +15,7 @@ type Coin = | Coin of Gem
 type Card = {
     image: Url;
     cost: Gem list;
-    provides: Gem; 
+    provides: Mine; 
     victoryPoints: VPs;
 }
 
@@ -25,13 +25,14 @@ type Noble = {
     victoryPoints: VPs;
 }
 
+type BankCount = int
 type Bank = {
-    red: int;
-    green: int;
-    brown: int;
-    white: int;
-    blue: int;
-    gold: int;
+    red: BankCount;
+    green: BankCount;
+    brown: BankCount;
+    white: BankCount;
+    blue: BankCount;
+    gold: BankCount;
 } with
     member this.GetCoinCount = function
         | Coin Red -> this.red
