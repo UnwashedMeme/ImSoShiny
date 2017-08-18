@@ -50,6 +50,6 @@ type ModelGen() =
                 <*> Arb.generate<Noble list>
                 <*> Arb.generate<VPs>
         }
-        gen |> Arb.fromGen
-
+        (function s -> Gen.resize (s/15) gen) |> Gen.sized |> Arb.fromGen
+        
 let config = { FsCheckConfig.defaultConfig with arbitrary = [typeof<ModelGen>] }

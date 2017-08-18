@@ -70,8 +70,8 @@ let turnDataTests =
         testPropertyWithConfig config "currentPlayer should be a game player"
             <| fun (turndata:TurnData) -> 
                 turndata.players |> Seq.contains turndata.currentPlayer;
-        // testPropertyWithConfig config "player count should be < 5"                
-        //     <| fun (turndata) ->
-        //         (Seq.length turndata.players) < 5
+        testPropertyWithConfig config "player count should be < 5"                
+            <| fun (turndata) ->
+                (Seq.length turndata.players) < 6
     ]
         
