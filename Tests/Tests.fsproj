@@ -7,7 +7,7 @@
     <Compile Include="ExpectoFsCheck.fs" />
     <Compile Include="Init.fs" />
     <Compile Include="TestModel.fs" />
-    <Compile Include="TestServer.fs" />
+    <Compile Include="TestActions.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>

@@ -5,8 +5,8 @@
   <ItemGroup>
     <Compile Include="Models.fs" />
     <Compile Include="Events.fs" />
+    <Compile Include="Actions.fs" />
     <Compile Include="Client.fs" />
-    <Compile Include="Server.fs" />
     <Compile Include="App.fs" />
   </ItemGroup>
   <ItemGroup>

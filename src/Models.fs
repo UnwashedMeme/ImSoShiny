@@ -108,8 +108,8 @@ type MainAction =
     | BuyCard of Card
     | ReserveCard of Card
 
-type DiscardCoinsAction = Coin list
-type BuyNobleAction = Noble option
+type DiscardCoinsAction = Discard of Coin list | NOP
+type BuyNobleAction = Buy of Noble | NOP
 
 type Action =
   | MainAction of MainAction

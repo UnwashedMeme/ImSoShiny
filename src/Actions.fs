@@ -1,14 +1,16 @@
-module Splendor.Server
+module Splendor.Actions
 open Splendor.Models
 open Splendor.Events
+
+let (>>=) m f = Result.bind f m
 
 module MainActions =
     let draw2OfSame (gamestate:TurnData) (player:Player) (coin:Coin) =
         let withdrawer b = Withdraw b coin
         gamestate.bank 
             |> withdrawer 
-            |> (Result.bind withdrawer)
-            |> (Result.bind (fun b -> Ok { gamestate with bank = b }))
+            >>= withdrawer
+            >>= (fun b -> Ok { gamestate with bank = b })
 
     let draw3Different (gamestate:TurnData) player (coin1,coin2,coin3) = 
         Error "Not different"
@@ -39,8 +41,7 @@ let nextPhase = function
 let anyPlayerOverTargetVP td = false
 let lastPlayerOfRound td = false
 
-let nextPlayer td = 
-    Turn td 
+let nextPlayer td = td 
 
 let endGame (td:TurnData) = 
     GameState.EndOfGame {
@@ -55,7 +56,7 @@ let finishTurn (td:TurnData) =
     if (anyPlayerOverTargetVP td && lastPlayerOfRound td) then
         endGame td
     else
-        nextPlayer td
+        Turn (nextPlayer td)
 
 let validateCorrectPlayer fromPlayer gamestate =
     let playerUp = gamestate.currentPlayer
@@ -74,18 +75,16 @@ let dispatchAction action turndata =
     | Action.DiscardCoinsAction dca-> discardCoins turndata player dca
     | Action.BuyNobleAction bna -> buyNoble turndata player bna
 
-let finishPhase turndata =
+let finalizeCheck turndata =
     Ok (match turndata.phase with
         | Finish -> finishTurn turndata
         | phase -> (Turn {turndata with phase = (nextPhase phase)}))
-    
-    
+   
 
-let (>>=) m f = Result.bind f m
 
 let processTurnAction player (action:Action) turnData =
     turnData
     |> validateCorrectPlayer player 
     >>= validatePhase action 
     >>= dispatchAction action
-    >>= finishPhase 
+    >>= finalizeCheck 

@@ -1,4 +1,5 @@
 module Tests.Models
+open Microsoft.FSharp.Reflection
 
 open Expecto
 open FsCheck
@@ -71,8 +72,35 @@ let turnDataTests =
         testPropertyWithConfig config "currentPlayer should be a game player"
             <| fun (turndata:TurnData) -> 
                 turndata.players |> Seq.contains turndata.currentPlayer;
-        testPropertyWithConfig config "player count should be < 5"                
-            <| fun (turndata) ->
-                (Seq.length turndata.players) < 6
     ]
-        
+
+
+// module SimpleUnionCaseInfoReflection =
+
+//   // will crash if 'T contains members which aren't only tags
+//   let Construct<'T> (caseInfo: UnionCaseInfo) =
+//      FSharpValue.MakeUnion(caseInfo, [||]) :?> 'T
+
+//   let GetUnionCaseInfoAndInstance<'T> (caseInfo: UnionCaseInfo) = 
+//     (caseInfo, Construct<'T> caseInfo)
+
+//   let AllCases<'T> = 
+//     FSharpType.GetUnionCases(typeof<'T>)
+//     |> Seq.map Construct<'T>
+
+//let coinlist = SimpleUnionCaseInfoReflection.AllCases<Coin>
+let coinlist = [Coin Green; Coin Red;]
+
+[<Tests>]
+let bankTests = 
+    testList "Test bank properties" [
+        testPropertyWithConfig config "Withdraw should always be positive"
+            <| fun (bank:Bank) (c:Coin) ->
+                match Withdraw bank c with
+                    | Error e -> ()
+                    | Ok newBank -> 
+                        let check c = (bank.GetCoinCount c) >= 0
+                        Expect.all coinlist check "No value should be less than 0"
+    ]
+
+
