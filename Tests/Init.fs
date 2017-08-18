@@ -30,7 +30,7 @@ type ModelGen() =
         let gen = gen { 
             let! players = Arb.generate<Player> |> Gen.nonEmptyListOf
             let! player = Gen.elements players
-            let makePlayer phase bank tier1 tier2 tier3 nobles targetVictoryPoints = {
+            let makeTurnData phase bank tier1 tier2 tier3 nobles targetVictoryPoints = {
                 players = players;
                 currentPlayer = player;
                 phase = phase;
@@ -41,7 +41,7 @@ type ModelGen() =
                 nobles = nobles;
                 targetVictoryPoints = targetVictoryPoints;
             }
-            return! makePlayer 
+            return! makeTurnData
                 <!> Arb.generate<TurnPhase>
                 <*> Arb.generate<Bank>
                 <*> Arb.generate<Card list>
