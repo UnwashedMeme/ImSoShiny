@@ -25,3 +25,5 @@ let testMainActions =
                         Expect.equal (Seq.length player.coins) ((Seq.length td.currentPlayer.coins) + 2) "Player should have 2 more coins"
                     
      ]
+
+//TODO: dispatchAction should always yield the next phase.
