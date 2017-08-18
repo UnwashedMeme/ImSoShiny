@@ -26,7 +26,8 @@ let BankTests =
                     
     
 
-let emptyPlayer = { 
+let emptyPlayer = {
+    id = 0;
     coins = [];
     cards = [];
     nobles = [];

@@ -57,6 +57,7 @@ let Withdraw (bank:Bank) (coin:Coin) =
         
  
 type Player = {
+    id: int;
     coins: Coin list;
     cards: Card list;
     nobles: Noble list;

@@ -2,57 +2,40 @@ module Splendor.Server
 open Splendor.Models
 open Splendor.Events
 
-let validateCorrectPlayer fromPlayer gamestate =
-    let playerUp = gamestate.currentPlayer
-    if playerUp <> fromPlayer then
-        Error "Not your turn"
-    else
-        Ok gamestate
+module MainActions =
+    let draw2OfSame (gamestate:TurnData) (player:Player) (coin:Coin) =
+        let withdrawer b = Withdraw b coin
+        gamestate.bank 
+            |> withdrawer 
+            |> (Result.bind withdrawer)
+            |> (Result.bind (fun b -> Ok { gamestate with bank = b }))
 
-let validatePhase action gamestate = 
-    Error "Wrong phase"
+    let draw3Different (gamestate:TurnData) player (coin1,coin2,coin3) = 
+        Error "Not different"
 
-let draw2OfSame (gamestate:TurnData) (player:Player) (coin:Coin) =
-    let withdrawer b = Withdraw b coin
-    gamestate.bank 
-        |> withdrawer 
-        |> (Result.bind withdrawer)
-        |> (Result.bind (fun b -> Ok { gamestate with bank = b }))
+    let buyCard gamestate player card = 
+        Error "Can't afford it"
 
-let draw3Different (gamestate:TurnData) player (coin1,coin2,coin3) = 
-    Error "Not different"
+    let reserveCard gamestate player card = 
+        Error "Already reserved one"
 
-let buyCard gamestate player card = 
-    Error "Can't afford it"
-
-let reserveCard gamestate player card = 
-    Error "Already reserved one"
+    let dispatch gamestate player = function
+        | MainAction.Draw2OfSame coin -> draw2OfSame gamestate player coin
+        | MainAction.Draw3Different (coin1,coin2,coin3) -> draw3Different gamestate player (coin1,coin2,coin3)
+        | MainAction.BuyCard card -> buyCard gamestate player card
+        | MainAction.ReserveCard card -> reserveCard gamestate player card        
 
 let discardCoins gamestate player discardCoinsAction = 
     Error "You don't have those coins."
 
 let buyNoble gamestate player buyNobleAction =
     Error "You don't have the cards."
-    
-
-let mainAction gamestate player = function
-    | MainAction.Draw2OfSame coin -> draw2OfSame gamestate player coin
-    | MainAction.Draw3Different (coin1,coin2,coin3) -> draw3Different gamestate player (coin1,coin2,coin3)
-    | MainAction.BuyCard card -> buyCard gamestate player card
-    | MainAction.ReserveCard card -> reserveCard gamestate player card
-
 
 let nextPhase = function
     | Main -> DiscardCoins
     | DiscardCoins -> BuyNoble
     | BuyNoble -> Finish
     | Finish -> Main
-
-let doAction gamestate player = function 
-    | Action.MainAction ma -> mainAction gamestate player ma 
-    | Action.DiscardCoinsAction dca-> discardCoins gamestate player dca
-    | Action.BuyNobleAction bna -> buyNoble gamestate player bna
-
 let anyPlayerOverTargetVP td = false
 let lastPlayerOfRound td = false
 
@@ -74,6 +57,23 @@ let finishTurn (td:TurnData) =
     else
         nextPlayer td
 
+let validateCorrectPlayer fromPlayer gamestate =
+    let playerUp = gamestate.currentPlayer
+    if playerUp.id <> fromPlayer.id then
+        Error "Not your turn"
+    else
+        Ok gamestate
+
+let validatePhase action gamestate = 
+    Error "Wrong phase"
+
+let dispatchAction action turndata =
+    let player = turndata.currentPlayer
+    match action with 
+    | Action.MainAction ma -> MainActions.dispatch turndata player ma 
+    | Action.DiscardCoinsAction dca-> discardCoins turndata player dca
+    | Action.BuyNobleAction bna -> buyNoble turndata player bna
+
 let finishPhase turndata =
     Ok (match turndata.phase with
         | Finish -> finishTurn turndata
@@ -83,15 +83,9 @@ let finishPhase turndata =
 
 let (>>=) m f = Result.bind f m
 
-let receiveCommand (gamestate:GameState) player (action:Action): ServerEvent =
-    gamestate
-    |> function  
-        | Turn x -> Ok x
-        | _ -> Error "Wrong stage of game"
+let processTurnAction player (action:Action) turnData =
+    turnData
+    |> validateCorrectPlayer player 
     >>= validatePhase action 
-    >>= validateCorrectPlayer player 
-    >>= fun turndata -> doAction turndata player action
+    >>= dispatchAction action
     >>= finishPhase 
-    |> function 
-        | Ok gamestate -> ServerEvent.GameStateUpdate gamestate
-        | Error err ->  ServerEvent.InvalidAction (player, action, err)
