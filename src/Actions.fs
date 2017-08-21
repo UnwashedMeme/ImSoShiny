@@ -4,13 +4,28 @@ open Splendor.Events
 
 let (>>=) m f = Result.bind f m
 
+let operateOnPlayer fn turndata =
+    let currentPlayer = turndata.currentPlayer
+    let replacer np = fun p -> if currentPlayer.id = p.id then np else p
+    let nextTurnData newplayer = { 
+        turndata with
+            currentPlayer = newplayer;
+            players = List.map (replacer newplayer) turndata.players;
+    }
+    currentPlayer |> fn |> Result.map nextTurnData
+
+let operateOnBank fn turndata =
+    let nextTurnData bank = {turndata with bank=bank;}
+    fn turndata.bank |> Result.map nextTurnData
+
 module MainActions =
-    let draw2OfSame (gamestate:TurnData) (player:Player) (coin:Coin) =
-        let withdrawer b = Withdraw b coin
-        gamestate.bank 
-            |> withdrawer 
-            >>= withdrawer
-            >>= (fun b -> Ok { gamestate with bank = b })
+    let draw2OfSame (turndata:TurnData) (player:Player) (coin:Coin) =
+        let addCoinsToPlayer p = Ok {p with coins = coin :: coin :: player.coins}
+        let withdraw1 bank = Withdraw bank coin
+        let withdraw2 bank = bank |> withdraw1 >>= withdraw1
+        turndata
+            |> operateOnPlayer addCoinsToPlayer 
+            >>= operateOnBank withdraw2
 
     let draw3Different (gamestate:TurnData) player (coin1,coin2,coin3) = 
         Error "Not different"
