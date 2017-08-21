@@ -22,7 +22,7 @@ let BankTests =
         testPropertyWithConfig config "Should have one less or error" 
             <| fun (bank:Bank) (c:Coin) ->
                 let count = bank.GetCoinCount c
-                match Withdraw bank c with
+                match Withdraw c bank with
                     | Ok bank -> (bank.GetCoinCount c) = (count - 1)
                     | Error reason -> count = 0;
     ]
@@ -98,7 +98,7 @@ let bankTests =
     testList "Test bank properties" [
         testPropertyWithConfig config "Withdraw should always be positive"
             <| fun (bank:Bank) (c:Coin) ->
-                match Withdraw bank c with
+                match Withdraw c bank with
                     | Error e -> ()
                     | Ok newBank -> 
                         let check c = (bank.GetCoinCount c) >= 0

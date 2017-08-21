@@ -42,7 +42,7 @@ type Bank = {
         | Coin Blue -> this.blue
         | Coin Gold -> this.gold
 
-let Withdraw (bank:Bank) (coin:Coin) =
+let Withdraw (coin:Coin) (bank:Bank) =
         let count = (bank.GetCoinCount coin) - 1
         if count >= 0 then
             Ok (match coin with

@@ -21,16 +21,18 @@ let operateOnBank fn turndata =
 
 module MainActions =
     let draw2OfSame (turndata:TurnData) (player:Player) (coin:Coin) =
-        let withdraw1 bank = Withdraw bank coin
-        let withdraw2 bank = bank |> withdraw1 >>= withdraw1
+        let withdraw2 bank = bank |> Withdraw coin >>= Withdraw coin
         let addToPlayer player = {player with coins = coin :: coin :: player.coins}
         turndata
             |> operateOnPlayer (addToPlayer >> Ok)
             >>= operateOnBank withdraw2
 
-
     let draw3Different (gamestate:TurnData) player (coin1,coin2,coin3) = 
-        Error "Not different"
+        if coin1 = coin2 || coin2 = coin3 || coin1 = coin3 then
+            Error "Not different"
+        else
+            let withdraw3 bank = bank |> Withdraw coin1 >>= Withdraw coin2 >>= Withdraw coin3
+            gamestate |> operateOnBank withdraw3
 
     let buyCard gamestate player card = 
         Error "Can't afford it"
