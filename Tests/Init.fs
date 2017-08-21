@@ -52,4 +52,4 @@ type ModelGen() =
         }
         (function s -> Gen.resize (s/15) gen) |> Gen.sized |> Arb.fromGen
         
-let config = { FsCheckConfig.defaultConfig with arbitrary = [typeof<ModelGen>] }
+let BaseConfig = { FsCheckConfig.defaultConfig with arbitrary = [typeof<ModelGen>] }

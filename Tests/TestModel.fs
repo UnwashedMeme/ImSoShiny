@@ -7,6 +7,8 @@ open FsCheck
 open Splendor.Models
 open Tests.Init
 
+let config = BaseConfig
+
 [<Tests>]
 let cardGenTests =
      testList "Test the card generator" [
@@ -71,7 +73,7 @@ let turnDataTests =
     testList "TurnData generation" [
         testPropertyWithConfig config "currentPlayer should be a game player"
             <| fun (turndata:TurnData) -> 
-                turndata.players |> Seq.contains turndata.currentPlayer;
+                Expect.contains turndata.players turndata.currentPlayer;
     ]
 
 
@@ -89,7 +91,7 @@ let turnDataTests =
 //     |> Seq.map Construct<'T>
 
 //let coinlist = SimpleUnionCaseInfoReflection.AllCases<Coin>
-let coinlist = [Coin Green; Coin Red;]
+let coinlist = [Coin White; Coin Blue; Coin Green; Coin Red; Coin Brown; Coin Gold]
 
 [<Tests>]
 let bankTests = 
