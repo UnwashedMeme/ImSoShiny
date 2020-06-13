@@ -1,8 +1,10 @@
 source https://nuget.org/api/v2
 
-clitool dotnet-fable
+#https://github.com/haf/expecto#installing
 nuget Expecto
-nuget Fable.Import.Browser
-nuget Expecto.VisualStudio.TestAdapter version_in_path: true
-nuget FsCheck
-nuget FSharp.NET.Sdk
+nuget Expecto.BenchmarkDotNet
+nuget Expecto.FsCheck
+nuget Expecto.Hopac
+
+# https://github.com/haf/expecto#prettify-stacktracesship-test-logs
+nuget Logary.Adapters.Facade prerelease

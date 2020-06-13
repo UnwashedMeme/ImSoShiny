@@ -1,4 +1,4 @@
-﻿module Main
+﻿module SplendorCoreTest
 open Expecto
 
 [<EntryPoint>]
