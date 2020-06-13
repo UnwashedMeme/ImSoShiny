@@ -72,7 +72,9 @@ let nextPhase =
 let anyPlayerOverTargetVP td = false
 let lastPlayerOfRound td = false
 
-let nextPlayer td = td
+let nextPlayer (players : Player list) ( player: Player) =
+    // TODO: implement
+    player
 
 let endGame (td: TurnData) =
     GameState.EndOfGame
@@ -85,7 +87,7 @@ let finishTurn (td: TurnData) =
     // next player
     if (anyPlayerOverTargetVP td && lastPlayerOfRound td)
     then endGame td
-    else Turn(nextPlayer td)
+    else Turn(td)
 
 let validateCorrectPlayer fromPlayer gamestate =
     let playerUp = gamestate.currentPlayer
@@ -117,3 +119,5 @@ let processTurnAction player (action: Action) turnData =
     >>= validatePhase action
     >>= dispatchAction action
     >>= finalizeCheck
+
+let takeTurn (turn : Turn) ( state: GameState2 ) = Ok state

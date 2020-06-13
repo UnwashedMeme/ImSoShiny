@@ -48,3 +48,32 @@ let testDispatchAction =
               | Error e -> ()
               | Ok nextTurnData ->
                   Expect.equal nextTurnData.phase (nextPhase td.phase) "Should have given the next phase" ]
+
+let checkCorrectNextPlayer (players : Player list) ( player1 : Player ) (player2: Player) =
+    Expect.equal (nextPlayer players player1) player2 "Incorrect next player"
+
+
+let checkMainAction (gs : GameState2) (turn : Turn) ( ngs : GameState2 ) =
+    Expect.equal true false "TODO: Check for legal actions"
+    Expect.equal true false "TODO: Check any purchase was from first 4 cards"
+    Expect.equal true false "TODO: check bank was updated"
+
+let checkBuyNoble (gs : GameState2) (turn : Turn) ( ngs : GameState2 ) =
+    Expect.equal true false "TODO: check noble got removed from list"
+
+[<Tests>]
+let testDispatchAction2 =
+    testList "Dispatch Action2"
+        [ testPropertyWithConfig config "next phase"
+          <| fun (turn: Turn) (gs2: ActiveGameState) ->
+              match takeTurn turn gs2 with
+              | Error e -> ()
+              | Ok ngs2 ->
+                  match ngs2.IsGameOver with
+                  | true -> ()
+                  | false ->
+                    checkCorrectNextPlayer gs2.Players gs2.ActivePlayer ngs2.ActivePlayer
+                    checkMainAction gs2 turn ngs2
+                    checkBuyNoble gs2 turn ngs2
+
+        ]

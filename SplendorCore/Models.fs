@@ -75,18 +75,35 @@ type Player =
         |> Seq.sum
 
 
+//// Actions
+
+type MainAction =
+    | Draw2OfSame of Coin
+    | Draw3Different of Coin * Coin * Coin
+    | BuyCard of Card
+    | ReserveCard of Card
+
+type DiscardCoinsAction =
+    | Discard of Coin list
+    | NOP
+
+type BuyNobleAction =
+    | Buy of Noble
+    | NOP
 
 //// Gamestate data
-
 type TurnPhase =
     | Main
     | DiscardCoins
     | BuyNoble
     | Finish
 
+
 type SetupData =
     { players: Player list
       targetVictoryPoints: VPs }
+
+
 
 type TurnData =
     { players: Player list
@@ -103,25 +120,32 @@ type EndOfGameData =
     { players: Player list
       targetVictoryPoints: VPs }
 
+
+type Turn =
+    { Player: Player
+      MainAction: MainAction
+      DicardAction: DiscardCoinsAction
+      Noble: BuyNobleAction }
+
+type GameState2 =
+    { Turns: Turn list
+      Players: Player list
+      ActivePlayer: Player
+
+      TargetVictoryPoints: VPs
+      Bank: Bank
+      Tier1Cards: Card list
+      Tier2Cards: Card list
+      Tier3Cards: Card list
+      Nobles: Noble list }
+    member this.IsGameOver: bool = false;
+
+
+
 type GameState =
     | Setup of SetupData
     | Turn of TurnData
     | EndOfGame of EndOfGameData
-
-
-type MainAction =
-    | Draw2OfSame of Coin
-    | Draw3Different of Coin * Coin * Coin
-    | BuyCard of Card
-    | ReserveCard of Card
-
-type DiscardCoinsAction =
-    | Discard of Coin list
-    | NOP
-
-type BuyNobleAction =
-    | Buy of Noble
-    | NOP
 
 type Action =
     | MainAction of MainAction
