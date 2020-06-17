@@ -2,6 +2,7 @@ module Tests.Actions
 
 open Expecto
 open FsCheck
+open Splendor.Bank
 open Splendor.Models
 open Splendor.Actions
 

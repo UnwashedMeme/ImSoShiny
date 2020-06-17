@@ -1,5 +1,6 @@
 module Splendor.Actions
 
+open Splendor.Bank
 open Splendor.Models
 open Splendor.Events
 

@@ -6,6 +6,7 @@ open Expecto
 open FsCheck
 
 open Splendor.Models
+open Splendor.Bank
 open Tests.Init
 
 let config = BaseConfig

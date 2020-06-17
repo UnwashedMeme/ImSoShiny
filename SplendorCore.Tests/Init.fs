@@ -2,6 +2,7 @@ module Tests.Init
 open Expecto
 open FsCheck
 open Splendor.Models
+open Splendor.Bank
 
 let chooseFromList xs =
   gen { let! i = Gen.choose (0, List.length xs-1)
@@ -22,7 +23,7 @@ type ModelGen() =
     static member VictoryPoints() : Arbitrary<VPs> =
         Gen.choose (0,6) |> Arb.fromGen
 
-    static member BankCount(): Arbitrary<BankCount> =
+    static member Count(): Arbitrary<Count> =
         Gen.choose (0,4) |> Arb.fromGen
 
     static member CoinList(): Arbitrary<Coin list> =

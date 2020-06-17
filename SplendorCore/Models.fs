@@ -1,22 +1,10 @@
 module Splendor.Models
 
+open Splendor.Bank
+
 type Url = string
 type Qty = int
 type VPs = int
-
-type Gem =
-    | Red
-    | Green
-    | Brown
-    | White
-    | Blue
-    | Gold
-
-type Mine = Mine of Gem
-type Coin = Coin of Gem
-// type Gem =
-//     | Mine of Red | Green | Brown | White | Blue | Gold
-//     | Coin of Red | Green | Brown | White | Blue | Gold
 
 
 type Card =
@@ -30,37 +18,7 @@ type Noble =
       cost: Mine list
       victoryPoints: VPs }
 
-type BankCount = int
 
-type Bank =
-    { red: BankCount
-      green: BankCount
-      brown: BankCount
-      white: BankCount
-      blue: BankCount
-      gold: BankCount }
-    member this.GetCoinCount =
-        function
-        | Coin Red -> this.red
-        | Coin Green -> this.green
-        | Coin Brown -> this.brown
-        | Coin White -> this.white
-        | Coin Blue -> this.blue
-        | Coin Gold -> this.gold
-
-let Withdraw (coin: Coin) (bank: Bank) =
-    let count = (bank.GetCoinCount coin) - 1
-    if count >= 0 then
-        Ok
-            (match coin with
-             | Coin Red -> { bank with red = count }
-             | Coin Brown -> { bank with brown = count }
-             | Coin White -> { bank with white = count }
-             | Coin Green -> { bank with green = count }
-             | Coin Blue -> { bank with blue = count }
-             | Coin Gold -> { bank with gold = count })
-    else
-        Result.Error "Not enough coins in bank"
 
 type Player =
     { id: int
