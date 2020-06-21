@@ -3,7 +3,7 @@ module Tests.Actions
 open Expecto
 open FsCheck
 open Splendor.Bank
-open Splendor.Models
+open Splendor.Gamestate
 open Splendor.Actions
 
 open Tests.Init
@@ -54,12 +54,12 @@ let checkCorrectNextPlayer (players : Player list) ( player1 : Player ) (player2
     Expect.equal (nextPlayer players player1) player2 "Incorrect next player"
 
 
-let checkMainAction (gs : GameState2) (turn : Turn) ( ngs : GameState2 ) =
+let checkMainAction (gs : GameState) (turn : Turn) ( ngs : GameState ) =
     Expect.equal true false "TODO: Check for legal actions"
     Expect.equal true false "TODO: Check any purchase was from first 4 cards"
     Expect.equal true false "TODO: check bank was updated"
 
-let checkBuyNoble (gs : GameState2) (turn : Turn) ( ngs : GameState2 ) =
+let checkBuyNoble (gs : GameState) (turn : Turn) ( ngs : GameState ) =
     Expect.equal true false "TODO: check noble got removed from list"
 
 [<Tests>]

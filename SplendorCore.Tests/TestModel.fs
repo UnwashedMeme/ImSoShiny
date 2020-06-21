@@ -5,7 +5,7 @@ open Microsoft.FSharp.Reflection
 open Expecto
 open FsCheck
 
-open Splendor.Models
+open Splendor.Gamestate
 open Splendor.Bank
 open Tests.Init
 

@@ -1,27 +1,30 @@
 module Splendor.Actions
 
 open Splendor.Bank
-open Splendor.Models
+open Splendor.Gamestate
+open Splendor.Card
+open Splendor.Player
 open Splendor.Events
 
 let (>>=) m f = Result.bind f m
 
 let operateOnPlayer fn turndata =
-    let currentPlayer = turndata.currentPlayer
+    let currentPlayer = turndata.CurrentPlayer
 
     let replacer np =
-        fun p -> if currentPlayer.id = p.id then np else p
+        fun p -> if currentPlayer.Id = p.Id then np else p
 
     let nextTurnData newplayer =
         { turndata with
-              currentPlayer = newplayer
-              players = turndata.players |> List.map (replacer newplayer) }
+              CurrentPlayer = newplayer
+              Players = turndata.Players |> List.map (replacer newplayer) }
 
     currentPlayer |> fn |> Result.map nextTurnData
 
+
 let operateOnBank fn turndata =
-    let nextTurnData bank = { turndata with bank = bank }
-    fn turndata.bank |> Result.map nextTurnData
+    let nextTurnData bank = { turndata with Bank = bank }
+    fn turndata.Bank |> Result.map nextTurnData
 
 
 module MainActions =
@@ -30,7 +33,7 @@ module MainActions =
 
         let addToPlayer player =
             { player with
-                  coins = coin :: coin :: player.coins }
+                  Coins = coin :: coin :: player.Coins }
 
         turndata
         |> operateOnPlayer (addToPlayer >> Ok)
@@ -77,6 +80,7 @@ let nextPlayer (players : Player list) ( player: Player) =
     // TODO: implement
     player
 
+
 let endGame (td: TurnData) =
     GameState.EndOfGame
         { players = td.players
@@ -91,13 +95,13 @@ let finishTurn (td: TurnData) =
     else Turn(td)
 
 let validateCorrectPlayer fromPlayer gamestate =
-    let playerUp = gamestate.currentPlayer
-    if playerUp.id <> fromPlayer.id then Error "Not your turn" else Ok gamestate
+    let playerUp = gamestate.CurrentPlayer
+    if playerUp.Id <> fromPlayer.Id then Error "Not your turn" else Ok gamestate
 
 let validatePhase action gamestate = Error "Wrong phase"
 
 let dispatchAction action turndata =
-    let player = turndata.currentPlayer
+    let player = turndata.CurrentPlayer
     match action with
     | Action.MainAction ma -> MainActions.dispatch turndata player ma
     | Action.DiscardCoinsAction dca -> discardCoins turndata player dca
@@ -121,4 +125,10 @@ let processTurnAction player (action: Action) turnData =
     >>= dispatchAction action
     >>= finalizeCheck
 
-let takeTurn (turn : Turn) ( state: GameState2 ) = Ok state
+let takeTurn (turn : Turn) ( state: GameState ) = Ok state
+
+
+
+
+
+let (foo x y z = x + y + z

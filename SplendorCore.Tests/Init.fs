@@ -1,7 +1,7 @@
 module Tests.Init
 open Expecto
 open FsCheck
-open Splendor.Models
+open Splendor.Gamestate
 open Splendor.Bank
 
 let chooseFromList xs =
@@ -17,7 +17,7 @@ let genRandomPlayerCoins =
         Gen.resize ( s / 10) (genRandomCoin |> Gen.listOf)
     gen |> Gen.sized
 
-type ActiveGameState = GameState2
+type ActiveGameState = GameState
 
 type ModelGen() =
     static member VictoryPoints() : Arbitrary<VPs> =
@@ -60,7 +60,7 @@ type ModelGen() =
         }
         (function s -> Gen.resize (s/15) gen) |> Gen.sized |> Arb.fromGen
 
-    static member ActiveGameState(): Arbitrary<GameState2> =
+    static member ActiveGameState(): Arbitrary<GameState> =
         let gen = gen {
             let makeGameState players bank tier1 tier2 tier3 nobles targetVictoryPoints = {
                 Turns = [];
