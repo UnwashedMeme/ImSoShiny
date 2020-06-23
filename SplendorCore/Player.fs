@@ -5,7 +5,7 @@ open Splendor.Card
 
 type Player =
     { Id: int
-      Coins: Coin list
+      Bank: Bank
       Cards: Card list
       Nobles: Noble list
       ReservedCards: Card list }
@@ -14,3 +14,6 @@ type Player =
           (this.Nobles |> Seq.map (fun b -> b.VictoryPoints)) ]
         |> Seq.concat
         |> Seq.sum
+
+    member this.HasTooManyCoins =
+      this.Bank.InventoryCount > 10

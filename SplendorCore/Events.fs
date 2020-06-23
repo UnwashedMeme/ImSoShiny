@@ -8,7 +8,7 @@ type Reason = string
 type ServerEvent =
     | ItIsYourTurn of Player
     | YouWon of Player
-    | GameStateUpdate of GameState2
+    | GameStateUpdate of GameState
     | InvalidAction of Player * Action * Reason
     | Ping
 
