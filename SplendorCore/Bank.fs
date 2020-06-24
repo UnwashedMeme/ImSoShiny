@@ -20,7 +20,13 @@ type Asset =
 type Mine = Mine of Asset
 type Coin = Coin of Asset
 
-let ALL_COINS = [| Coin White; Coin Blue; Coin Green; Coin Red; Coin Brown; Coin Gold|]]
+let ALL_COINS =
+    [| Coin White
+       Coin Blue
+       Coin Green
+       Coin Red
+       Coin Brown
+       Coin Gold |]
 
 type Bank =
     { Red: Count
@@ -38,18 +44,18 @@ type Bank =
         | Coin Blue -> this.Blue
         | Coin Gold -> this.Gold
     /// Get the total count of all coins in the bank
-    member this.InventoryCount =
-        Seq.sumBy this.GetCoinCount ALL_COINS
+    member this.InventoryCount = Seq.sumBy this.GetCoinCount ALL_COINS
 
-let deposit (coin : Coin) (bank : Bank) =
+let deposit (coin: Coin) (bank: Bank) =
     let count = (bank.GetCoinCount coin) + 1
-    Ok (match coin with
-             | Coin Red -> { bank with Red = count }
-             | Coin Brown -> { bank with Brown = count }
-             | Coin White -> { bank with White = count }
-             | Coin Green -> { bank with Green = count }
-             | Coin Blue -> { bank with Blue = count }
-             | Coin Gold -> { bank with Gold = count })
+    Ok
+        (match coin with
+         | Coin Red -> { bank with Red = count }
+         | Coin Brown -> { bank with Brown = count }
+         | Coin White -> { bank with White = count }
+         | Coin Green -> { bank with Green = count }
+         | Coin Blue -> { bank with Blue = count }
+         | Coin Gold -> { bank with Gold = count })
 
 let withdraw (coin: Coin) (bank: Bank) =
     let count = (bank.GetCoinCount coin) - 1

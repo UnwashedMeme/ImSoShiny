@@ -1,17 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="Bank.fs" />
     <Compile Include="Card.fs" />
     <Compile Include="Player.fs" />
     <Compile Include="GameState.fs" />
     <Compile Include="Events.fs" />
-    <Compile Include="Actions.fs" />
-
   </ItemGroup>
-
 </Project>

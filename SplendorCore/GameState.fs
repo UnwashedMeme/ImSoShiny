@@ -42,7 +42,7 @@ type Turn =
 
 type GameState =
     { Turns: Turn list
-      Players: Player list
+      Players: Player[]
       ActivePlayerIdx: int
 
       TargetVictoryPoints: VPs
@@ -68,7 +68,7 @@ type GameState =
 
     member this.ActivePlayer = Seq.item this.ActivePlayerIdx this.Players
 
-    member this.NextPlayer =
+    member this.AdvancePlayer =
         { this with
               ActivePlayerIdx = (this.ActivePlayerIdx + 1) % this.PlayerCount }
 
@@ -93,7 +93,7 @@ module ProcessTurn =
                 fun p -> if player.Id = p.Id then np else p
 
             { gamestate with
-                  Players = List.map replacer gamestate.Players }
+                  Players = Array.map replacer gamestate.Players }
 
         player |> fn |> Result.map nextstate
 
@@ -108,11 +108,11 @@ module ProcessTurn =
     let draw2OfSame (coin: Coin) (gamestate: GameState) =
         let withdraw2 bank = bank |> withdraw coin >>= withdraw coin
         let deposit2 bank = bank |> deposit coin >>= deposit coin
-        let hasEnoughCoinsRemaining bank =
+        let hasEnoughCoinsRemaining (bank:Bank) =
             if bank.GetCoinCount coin >= 2 then
                 Ok bank
             else
-                Error "When taking 2 coins you must leave at least 2 coins of that color in the bank".
+                Error "When taking 2 coins you must leave at least 2 coins of that color in the bank"
         gamestate
             |> operateOnCentralBank withdraw2
             >>= operateOnCentralBank hasEnoughCoinsRemaining
@@ -152,12 +152,16 @@ module ProcessTurn =
         | MainAction.ReserveCard card -> reserveCard card gamestate
 
     let discardCoins (turn: Turn) (gamestate: GameState) =
+        let checker msg (gamestate:GameState) =
+            if gamestate.ActivePlayer.HasTooManyCoins
+            then Error msg
+            else Ok gamestate
+
         match turn.DicardAction with
         | DiscardCoinsAction.NOP ->
-            if gamestate.ActivePlayer.HasTooManyCoins
-            then Error "Player has too many coins, must discard"
-            else Ok gamestate
+            checker "Player has too many coins, must discard" gamestate
         | DiscardCoinsAction.Discard coins ->
+
             let withdrawAll (bank: Bank) =
                 let withdraw1 (bankres: Result<Bank, string>) coin =
                     match bankres with
@@ -167,6 +171,7 @@ module ProcessTurn =
                 Seq.fold withdraw1 (Ok bank) coins
 
             operateOnPlayerBank withdrawAll gamestate
+            >>= checker "Still too many coins, discard more."
 
     let buyNoble (turn: Turn) (gamestate: GameState) =
         match turn.Noble with
@@ -175,10 +180,17 @@ module ProcessTurn =
             if Seq.contains noble gamestate.Nobles then Error "That noble is not available" else Ok gamestate
 
     let finish (turn: Turn) (gamestate: GameState) =
-        if gamestate.IsGameOver then Ok gamestate else Ok gamestate.NextPlayer
+        if gamestate.IsGameOver then Ok gamestate else Ok gamestate.AdvancePlayer
+
+    let validateCorrectPlayer (turn:Turn) (gamestate:GameState) =
+        if turn.Player.Id <> gamestate.ActivePlayer.Id then
+            Error "Not your turn"
+        else
+            Ok gamestate
 
     let processTurn turn gamestate =
         gamestate
+        >>= validateCorrectPlayer turn
         >>= dispatchMainAction turn
         >>= discardCoins turn
         >>= buyNoble turn
