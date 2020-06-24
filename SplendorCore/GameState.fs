@@ -105,11 +105,11 @@ module ProcessTurn =
 
         gamestate |> operateOnPlayer playerMod
 
-    let draw2OfSame (coin: Coin) (gamestate: GameState) =
-        let withdraw2 bank = bank |> withdraw coin >>= withdraw coin
-        let deposit2 bank = bank |> deposit coin >>= deposit coin
+    let draw2OfSame (Coin coin) (gamestate: GameState) =
+        let withdraw2 = withdraw coin 2
+        let deposit2 = deposit coin 2
         let hasEnoughCoinsRemaining (bank:Bank) =
-            if bank.GetCoinCount coin >= 2 then
+            if bank.GetCount coin >= 2 then
                 Ok bank
             else
                 Error "When taking 2 coins you must leave at least 2 coins of that color in the bank"
@@ -119,21 +119,21 @@ module ProcessTurn =
             >>= operateOnPlayerBank deposit2
 
 
-    let draw3Different (coin1, coin2, coin3) (gamestate: GameState) =
+    let draw3Different ((Coin coin1), (Coin coin2), (Coin coin3)) (gamestate: GameState) =
         if coin1 = coin2 || coin2 = coin3 || coin1 = coin3 then
             Error "When drawing 3 coins they must be distinct"
         else
             let withdraw3 bank =
                 bank
-                |> withdraw coin1
-                >>= withdraw coin2
-                >>= withdraw coin3
+                |> withdraw coin1 1
+                >>= withdraw coin2 1
+                >>= withdraw coin3 1
 
             let deposit3 bank =
                 bank
-                |> deposit coin1
-                >>= deposit coin2
-                >>= deposit coin3
+                |> deposit coin1 1
+                >>= deposit coin2 1
+                >>= deposit coin3 1
 
             gamestate
             |> operateOnCentralBank withdraw3
@@ -163,9 +163,9 @@ module ProcessTurn =
         | DiscardCoinsAction.Discard coins ->
 
             let withdrawAll (bank: Bank) =
-                let withdraw1 (bankres: Result<Bank, string>) coin =
+                let withdraw1 (bankres: Result<Bank, string>) (Coin asset) =
                     match bankres with
-                    | Result.Ok bank -> withdraw coin bank
+                    | Result.Ok bank -> withdraw asset 1 bank
                     | Result.Error err -> Result.Error err
 
                 Seq.fold withdraw1 (Ok bank) coins

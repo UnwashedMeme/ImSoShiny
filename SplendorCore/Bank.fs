@@ -20,13 +20,13 @@ type Asset =
 type Mine = Mine of Asset
 type Coin = Coin of Asset
 
-let ALL_COINS =
-    [| Coin White
-       Coin Blue
-       Coin Green
-       Coin Red
-       Coin Brown
-       Coin Gold |]
+let ASSETS =
+    [| White
+       Blue
+       Green
+       Red
+       Brown
+       Gold |]
 
 type Bank =
     { Red: Count
@@ -35,38 +35,40 @@ type Bank =
       White: Count
       Blue: Count
       Gold: Count }
-    member this.GetCoinCount =
+    member this.GetCount =
         function
-        | Coin Red -> this.Red
-        | Coin Green -> this.Green
-        | Coin Brown -> this.Brown
-        | Coin White -> this.White
-        | Coin Blue -> this.Blue
-        | Coin Gold -> this.Gold
+        | White -> this.White
+        | Blue -> this.Blue
+        | Green -> this.Green
+        | Red -> this.Red
+        | Brown -> this.Brown
+        | Gold -> this.Gold
+
+    member this.GetCoinCount(Coin asset) = this.GetCount asset
     /// Get the total count of all coins in the bank
-    member this.InventoryCount = Seq.sumBy this.GetCoinCount ALL_COINS
+    member this.InventoryCount = Seq.sumBy this.GetCount ASSETS
 
-let deposit (coin: Coin) (bank: Bank) =
-    let count = (bank.GetCoinCount coin) + 1
+let deposit asset count (bank: Bank) =
+    let count = (bank.GetCount asset) + count
     Ok
-        (match coin with
-         | Coin Red -> { bank with Red = count }
-         | Coin Brown -> { bank with Brown = count }
-         | Coin White -> { bank with White = count }
-         | Coin Green -> { bank with Green = count }
-         | Coin Blue -> { bank with Blue = count }
-         | Coin Gold -> { bank with Gold = count })
+        (match asset with
+         | Red -> { bank with Red = count }
+         | Brown -> { bank with Brown = count }
+         | White -> { bank with White = count }
+         | Green -> { bank with Green = count }
+         | Blue -> { bank with Blue = count }
+         | Gold -> { bank with Gold = count })
 
-let withdraw (coin: Coin) (bank: Bank) =
-    let count = (bank.GetCoinCount coin) - 1
+let withdraw asset count (bank: Bank) =
+    let count = (bank.GetCount asset) - count
     if count >= 0 then
         Ok
-            (match coin with
-             | Coin Red -> { bank with Red = count }
-             | Coin Brown -> { bank with Brown = count }
-             | Coin White -> { bank with White = count }
-             | Coin Green -> { bank with Green = count }
-             | Coin Blue -> { bank with Blue = count }
-             | Coin Gold -> { bank with Gold = count })
+            (match asset with
+             | Red -> { bank with Red = count }
+             | Brown -> { bank with Brown = count }
+             | White -> { bank with White = count }
+             | Green -> { bank with Green = count }
+             | Blue -> { bank with Blue = count }
+             | Gold -> { bank with Gold = count })
     else
         Result.Error "Not enough coins in bank"

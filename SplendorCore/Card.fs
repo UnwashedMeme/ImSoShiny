@@ -7,7 +7,7 @@ type VPs = int
 
 type Card =
     { Image: Url
-      Cost: Asset list
+      Cost: Bank
       Provides: Mine
       VictoryPoints: VPs }
 
