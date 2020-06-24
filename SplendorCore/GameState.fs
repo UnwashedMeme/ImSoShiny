@@ -139,7 +139,30 @@ module ProcessTurn =
             |> operateOnCentralBank withdraw3
             >>= operateOnPlayerBank deposit3
 
-    let buyCard card gamestate = Error "Can't afford it"
+    let buyCard (card:Card) (gamestate:GameState) =
+        let cardCost = card.Cost
+        let playerMines = gamestate.ActivePlayer.Cards
+        let coinsRequired asset =
+            let required = cardCost.GetCount asset
+            let counter (card:Card) =
+                let (Mine mine) = card.Provides
+                if asset = mine then 1 else 0
+            required - (Seq.sumBy counter playerMines)
+
+        let playerPays bank =
+            let deducter r (asset:Asset) =
+                let coincount = coinsRequired asset
+                match r with
+                    | Ok bank -> withdraw asset coincount bank
+                    | Error s -> Error s
+            Array.fold deducter (Ok bank) ASSETS
+
+        let giveCard (player:Player) =
+            Ok {player with Cards = card :: player.Cards }
+
+        gamestate
+        |> operateOnPlayerBank playerPays
+        >>= operateOnPlayer giveCard
 
     let reserveCard card gamestate = Error "Already reserved three"
 
